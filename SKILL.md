@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
+description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy. Also use when the user says, in Portuguese, "cria uma skill", "cria uma skill nova", "transforma isso numa skill", "vira skill", "quero repetir esse processo em outros projetos", "melhora a skill X", "a skill não está sendo chamada", "testa a skill", "compara com e sem a skill" - even without the word "skill-creator".
 ---
 
 # Skill Creator
@@ -28,6 +28,56 @@ Of course, you should always be flexible and if the user is like "I don't need t
 Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
 
 Cool? Cool.
+
+## Padrão da casa (vale por cima do resto quando conflitar)
+
+Este usuário cria skills para repetir processos que já deram certo (a `chrome-extension-creator`
+saiu da SnapEasy, por exemplo). Ele não quer responder pergunta por pergunta nem ficar sem saber
+o que vem depois. Responda em PT-BR, com acentuação correta e hífen no lugar de travessão.
+
+**Na primeira resposta, mostre o roteiro** em poucas linhas, para ele saber o caminho todo:
+
+```
+Vou fazer assim:
+1. Briefing - o que a skill faz, quando entra e o nome (perguntas abaixo, numa mensagem só).
+2. Rascunho - SKILL.md enxuto + scripts/references só onde fizer diferença.
+3. Testes - 2 ou 3 pedidos reais, rodados com e sem a skill, e te mostro a diferença.
+4. Ajustes - corrijo pelo que você comentar e rodo de novo até ficar bom.
+5. Gatilho - afino a description para ela entrar quando deve (opcional).
+6. Fechamento - README, git, repo privado, conta da Mari, roteador de skills e memória.
+```
+
+Depois faça as perguntas do briefing **numa mensagem só** (lista e tabela de decisões em
+`references/briefing.md`). Se o processo já aconteceu nesta conversa ("transforma isso numa
+skill"), extraia as respostas dela e pergunte só o que falta. Se a skill já existe, leia a pasta
+inteira antes de perguntar.
+
+**O nome sempre se pergunta**, com 2 ou 3 sugestões em kebab-case, conferindo colisão com
+`ls ~/.claude/skills ~/.claude/plugins/cache/*/*/*/skills 2>/dev/null` e com o
+`~/.claude/skills-routing/ROTEADOR.md`. Não crie pasta, repo nem arquivo antes da resposta:
+tudo leva o nome e teria de ser refeito.
+
+**Feche o briefing com um resumo de 5 linhas** e siga sem pedir nova confirmação, salvo ambiguidade.
+
+**O que a skill gerada deve trazer, no padrão da casa:**
+- Description em PT-BR com os gatilhos em português que ele fala de verdade (e os termos técnicos
+  em inglês que aparecem no assunto), terminando com "mesmo que não diga a palavra skill".
+- Roteiro na primeira resposta e briefing numa mensagem só, quando a skill tiver mais de 3 passos -
+  é o que fez a `chrome-extension-creator` funcionar bem.
+- Checkpoint de decisão do usuário dizendo o que fazer se não houver resposta: seguir com o padrão
+  provisório e listar como pendência, sem travar o resto do fluxo.
+- Ação pública, irreversível ou paga só com ok explícito naquele momento.
+- As regras globais que tocam o assunto, escritas na própria skill quando ela vai mexer nisso
+  (segredo só por `.env.local`, nunca matar o navegador, `ERRORS.md` com códigos, fallback de
+  serviço externo, lista final pronta para WhatsApp).
+- Seção "Armadilhas que já custaram tempo" quando o processo de origem teve erros reais.
+- Tabela "Arquivos desta skill" no fim (arquivo → quando ler).
+
+**Onde ficam as coisas:** skill nova em `~/.claude/skills/<nome>/`; workspace dos evals no
+scratchpad da sessão (não como pasta irmã da skill, que poluiria `~/.claude/skills/`).
+
+**Ao terminar, siga `references/fechamento.md`** (README, git com acentos, repo privado,
+symlink na conta Mari, ROTEADOR + CATALOGO, memória, lista de pendências para o WhatsApp).
 
 ## Communicating with the user
 
@@ -164,7 +214,7 @@ See `references/schemas.md` for the full schema (including the `assertions` fiel
 
 This section is one continuous sequence — don't stop partway through. Do NOT use `/skill-test` or any other testing skill.
 
-Put results in `<skill-name>-workspace/` as a sibling to the skill directory. Within the workspace, organize results by iteration (`iteration-1/`, `iteration-2/`, etc.) and within that, each test case gets a directory (`eval-0/`, `eval-1/`, etc.). Don't create all of this upfront — just create directories as you go.
+Put results in `<skill-name>-workspace/` inside the session scratchpad (not as a sibling to the skill directory - that would add a fake skill folder to `~/.claude/skills/`). Within the workspace, organize results by iteration (`iteration-1/`, `iteration-2/`, etc.) and within that, each test case gets a directory (`eval-0/`, `eval-1/`, etc.). Don't create all of this upfront — just create directories as you go.
 
 ### Step 1: Spawn all runs (with-skill AND baseline) in the same turn
 
@@ -466,6 +516,8 @@ The agents/ directory contains instructions for specialized subagents. Read them
 
 The references/ directory has additional documentation:
 - `references/schemas.md` — JSON structures for evals.json, grading.json, etc.
+- `references/briefing.md` — briefing questions (one message) and answer → decision table (padrão da casa)
+- `references/fechamento.md` — closing checklist: README, git, private repo, Mari symlink, skills router, memory
 
 ---
 
